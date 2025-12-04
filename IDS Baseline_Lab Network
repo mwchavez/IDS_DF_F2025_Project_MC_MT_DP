@@ -1,0 +1,76 @@
+# IDS Baseline – Lab Network (Security Onion + Kali on VMnet2)
+
+## 1. Scope
+
+This baseline describes “normal” traffic observed by the Security Onion sensor in a small lab network.
+
+- **Sensor:** Security Onion VM
+- **Monitoring interface:** `bond0` (attached to VMware VMnet2, sniffing only)
+- **Client host:** Kali Linux on `10.10.10.5` (`eth1`)
+- **Baseline window:** ~10–15 minutes during a quiet period with no deliberate attacks
+- **Traffic pattern:** light ICMP, TCP, and UDP traffic from Kali to an internal test IP (`10.10.10.100`)
+
+During this window the only intentional activity was basic workstation-style behavior (pings and connection attempts to common service ports). No port scans or exploit tools were run.
+
+## 2. Environment
+
+- Security Onion:
+  - `bond0` is configured as the main sensor monitoring interface (read-only in SOC → Configuration → sensor → interface).
+  - Stenographer, Zeek, and Suricata are all bound to `bond0` and ingest traffic from VMnet2.
+- Kali:
+  - `eth1` statically configured as `10.10.10.5/24` on VMnet2.
+  - Simple loop script periodically sending:
+    - ICMP pings to `10.10.10.100`
+    - TCP connection attempts to ports 80 and 443 on `10.10.10.100`
+    - UDP packets to port 53 on `10.10.10.100`
+
+Baseline capture was confirmed via:
+- `tcpdump -ni bond0 host 10.10.10.5` on the sensor
+- PCAP slices in SOC → PCAP for the baseline time window
+- Hunt results for `10.10.10.5` showing Zeek `conn` events and Suricata events
+
+## 3. Baseline Traffic Characteristics
+
+### 3.1 Top Talkers
+
+From Zeek/Suricata views in SOC:
+
+- `10.10.10.5` – primary talker; almost all connections originate from this Kali lab host.
+- Occasional low-volume background traffic from hypervisor/NAT infrastructure (DHCP, broadcast), treated as noise.
+
+### 3.2 Top Ports / Services
+
+Most frequently observed destination ports during the baseline:
+
+- **80/tcp (HTTP)** – repeated connection attempts from Kali to the internal test IP.
+- **443/tcp (HTTPS)** – additional connection attempts to mimic secure web traffic.
+- **53/udp (DNS)** – UDP packets to port 53 to simulate DNS queries.
+
+No unusual service ports or high-numbered ports were observed during the baseline period.
+
+### 3.3 Protocol Mix
+
+Baseline protocol distribution:
+
+- **TCP:** dominant protocol, used for HTTP/HTTPS connection attempts.
+- **UDP:** present for DNS-style traffic to port 53.
+- **ICMP:** periodic pings used for simple reachability checks.
+
+Overall volume is low and predictable, consistent with a single workstation periodically checking connectivity and attempting web/DNS access.
+
+## 4. “Normal” for This Lab
+
+In this environment, “normal” looks like:
+
+- One main client IP (`10.10.10.5`) generating nearly all connections.
+- A small, fixed set of destination ports (80, 443, 53).
+- Low, steady traffic volume with no large spikes.
+- No scanning across many ports or many different destination IPs.
+
+Any future activity that introduces new top talkers, many new ports, or noticeable spikes in flow count should stand out clearly against this baseline and be investigated as potentially malicious.
+
+## 5. Views Used
+
+- **PCAP:** SOC → PCAP → Query PCAP for the baseline window to confirm packet capture.
+- **Hunt:** SOC → Hunt with query `10.10.10.5` to verify Zeek `conn` entries and Suricata events for the Kali host.
+- **CLI:** Occasional use of `tcpdump -ni bond0 host 10.10.10.5` to spot-check live traffic on the sensor interface.
