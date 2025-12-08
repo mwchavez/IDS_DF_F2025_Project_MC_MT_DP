@@ -1,0 +1,48 @@
+# IDS Milestone 2 – Curated Suricata Rules  
+*(IDS-10 and IDS-11)*
+
+Environment for this portion of the milestone:
+
+- Sensor: **Security Onion 2.4.x** (single-node lab deployment)
+- IDS engine: **Suricata (NIDS)**
+- Attacker host: **Kali Linux VM** on the same lab network
+- All attack traffic originates from Kali and targets the Security Onion sensor (or services fronted by it).
+
+---
+
+## IDS-10 – Identify Lab Attack Scenarios and Map Rules
+
+For IDS-10, I defined three repeatable lab attack scenarios that exercise different parts of the Suricata ruleset: network reconnaissance, authentication abuse, and web-application attacks. For each scenario, I selected or created at least one Suricata rule and documented the mapping.
+
+### Scenario Definitions and Rule Mapping
+
+| Scenario | Description / Tool (from Kali) | Suricata Rule Title | SID (publicId) | Ruleset | Enabled? |
+|---------|---------------------------------|---------------------|----------------|---------|---------|
+| **A – Port scan** | TCP SYN scan against the Security Onion host using Nmap:<br>`sudo nmap -sS -T4 -p 1-100 SO_IP` | `LAB Possible TCP SYN Scan` | **9000001** | `__custom__` | `true` |
+| **B – SSH brute/scan** | Repeated TCP connection attempts to SSH on port 22 using a simple `nc` loop:<br>`for i in $(seq 1 25); do nc -vz SO_IP 22; done` | `LAB Possible SSH Brute Force` | **9000002** | `__custom__` | `true` |
+| **C – HTTP web attack** | Suspicious HTTP GET to `nmap.php` with a `target` parameter from Kali:<br>`curl "http://SO_IP/nmap.php?target=1.2.3.4"` | `ET WEB_SPECIFIC_APPS SnortReport nmap.php target Parameter Arbitrary Command Execution Attempt` | **2011555** | `ETOPEN` | `true` |
+
+These three scenarios give a compact but meaningful lab set: recon (SYN scan), service abuse (SSH), and web-app exploitation (HTTP).
+
+---
+
+## IDS-11 – Enable/Disable or Adjust Suricata Rules to Create a Focused “Lab Rule Pack”
+
+For IDS-11, I curated a focused lab rule pack using the **SOC → Detections → Suricata (NIDS)** interface. The goal was to:
+
+1. Create targeted custom rules for the port-scan and SSH scenarios.
+2. Ensure at least one appropriate HTTP attack rule was enabled.
+3. Keep unrelated high-noise rules out of the way so alerts are easy to interpret.
+
+```text
+### Custom Rule 1 – LAB Possible TCP SYN Scan (Port Scan)
+alert tcp any any -> $HOME_NET any (msg:"LAB Possible TCP SYN Scan"; flags:S; threshold:type both, track by_src, count 10, seconds 10; classtype:attempted-recon; sid:9000001; rev:1;)
+
+### Custom Rule 2 – LAB Possible SSH Brute Force (SSH Scan/Brute)
+alert tcp any any -> $HOME_NET 22 (msg:"LAB Possible SSH Brute Force"; flags:S; threshold:type both, track by_src, count 10, seconds 60; classtype:attempted-admin; sid:9000002; rev:1;)
+
+### Custom Rule 3 – SnortReport HTTP Command Execution (HTTP Web Attack)
+# Existing ET OPEN rule used as part of the lab pack
+# Title: ET WEB_SPECIFIC_APPS SnortReport nmap.php target Parameter Arbitrary Command Execution Attempt
+# SID: 2011555
+# Ruleset: ETOPEN
