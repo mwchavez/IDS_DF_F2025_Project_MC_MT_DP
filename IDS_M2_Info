@@ -46,3 +46,64 @@ alert tcp any any -> $HOME_NET 22 (msg:"LAB Possible SSH Brute Force"; flags:S; 
 # Title: ET WEB_SPECIFIC_APPS SnortReport nmap.php target Parameter Arbitrary Command Execution Attempt
 # SID: 2011555
 # Ruleset: ETOPEN
+
+---
+
+## IDS-12 – Trigger Each Scenario and Confirm Alerts
+
+For IDS-12, I executed each of the three lab scenarios from the Kali VM and verified that Suricata generated at least one alert for the corresponding rule.
+
+### Scenario A – Port Scan (LAB Possible TCP SYN Scan)
+
+- Command on Kali: `sudo nmap -sS -T4 -p 1-100 SO_IP`
+- Expected mapping:
+  - Rule: LAB Possible TCP SYN Scan
+  - SID: 9000001
+- Verification steps:
+  - In SOC, open Alerts and set the time range to “Last 15 minutes”.
+  - Filter by signature name `LAB Possible TCP SYN Scan` or by source IP `KALI_IP`.
+  - Confirm at least one alert with:
+    - Source IP = KALI_IP
+    - Destination IP = SO_IP
+    - Signature = LAB Possible TCP SYN Scan.
+- Evidence: screenshot `m2_scenarioA_portscan_alert.png` showing the alert row with correct src/dst and signature.
+
+---
+
+### Scenario B – SSH Brute/Scan (LAB Possible SSH Brute Force)
+
+- Command on Kali: `for i in $(seq 1 25); do nc -vz SO_IP 22; done`
+- Expected mapping:
+  - Rule: LAB Possible SSH Brute Force
+  - SID: 9000002
+- Verification steps:
+  - In SOC → Alerts, time range “Last 15 minutes”.
+  - Filter by signature name `LAB Possible SSH Brute Force` or by source IP `KALI_IP`.
+  - Confirm at least one alert with:
+    - Source IP = KALI_IP
+    - Destination IP = SO_IP
+    - Destination port = 22/tcp
+    - Signature = LAB Possible SSH Brute Force.
+- Evidence: screenshot `m2_scenarioB_ssh_alert.png` showing the SSH brute/scan alert.
+
+---
+
+### Scenario C – HTTP Web Attack (SnortReport nmap.php)
+
+- Command on Kali: `curl "http://SO_IP/nmap.php?target=1.2.3.4"`
+- Expected mapping:
+  - Rule: ET WEB_SPECIFIC_APPS SnortReport nmap.php target Parameter Arbitrary Command Execution Attempt
+  - SID: 2011555
+- Verification steps:
+  - In SOC → Alerts, time range “Last 15 minutes”.
+  - Search for `nmap.php` or filter by the SnortReport rule title.
+  - Confirm at least one alert with:
+    - Source IP = KALI_IP
+    - Destination IP = SO_IP
+    - Protocol = http
+    - Signature = ET WEB_SPECIFIC_APPS SnortReport nmap.php target Parameter Arbitrary Command Execution Attempt.
+- Evidence: screenshot `m2_scenarioC_http_alert.png` showing the HTTP attack alert.
+
+---
+
+IDS-12 Result: all three lab scenarios produced the expected Suricata alerts, confirming that the curated lab rule pack is active and correctly detecting the Nmap scan, SSH brute/scan, and HTTP web-attack traffic generated from the Kali VM.
