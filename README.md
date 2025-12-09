@@ -8,22 +8,6 @@ The repo is organized around two main tracks:
 - **IDS Track** – Building, tuning, and validating an IDS sensor stack.
 - **DF Track** – Reconstructing incidents, preserving evidence, and writing a final case report.
 
----
-
-## Table of Contents
-
-- [Project Overview](#project-overview)
-- [Repository Structure](#repository-structure)
-- [Technologies Used](#technologies-used)
-- [IDS Track – Milestones](#ids-track--milestones)
-- [Digital Forensics Track – Milestones](#digital-forensics-track--milestones)
-- [How to Reproduce / Run Labs](#how-to-reproduce--run-labs)
-- [Learning Objectives](#learning-objectives)
-- [How This Maps to User Stories & Issues](#how-this-maps-to-user-stories--issues)
-- [License](#license)
-
----
-
 ## Project Overview
 
 This project is structured as two parallel “mini–projects” that are tightly connected:
