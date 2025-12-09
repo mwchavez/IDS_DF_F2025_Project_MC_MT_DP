@@ -1,16 +1,3 @@
-## IDS-13 – Enable Zeek for conn, DNS, HTTP, SSL/TLS
-
-For IDS-13, I verified that Zeek was enabled on the Security Onion sensor and that it was producing the core protocol logs required for this milestone.
-
-- In the SOC web UI, I confirmed that the Zeek service was reported as healthy.
-- On the Security Onion VM, I checked the Zeek log directory at `/nsm/bro/logs/current/` and verified that the following files were present and actively updating:
-  - `conn.log` – connection metadata
-  - `dns.log` – DNS queries and responses
-  - `http.log` – HTTP requests and responses
-  - `ssl.log` and `x509.log` – TLS handshake and certificate information
-- This confirmed that Zeek was enabled and monitoring the same traffic seen by Suricata on the lab network.
-
----
 
 ## IDS-14 – Generate Sample HTTP, DNS, and TLS Traffic and Confirm Logs
 
