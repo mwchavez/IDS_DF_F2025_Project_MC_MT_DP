@@ -1,0 +1,69 @@
+## IDS-13 – Enable Zeek for conn, DNS, HTTP, SSL/TLS
+
+For IDS-13, I verified that Zeek was enabled on the Security Onion sensor and that it was producing the core protocol logs required for this milestone.
+
+- In the SOC web UI, I confirmed that the Zeek service was reported as healthy.
+- On the Security Onion VM, I checked the Zeek log directory at `/nsm/bro/logs/current/` and verified that the following files were present and actively updating:
+  - `conn.log` – connection metadata
+  - `dns.log` – DNS queries and responses
+  - `http.log` – HTTP requests and responses
+  - `ssl.log` and `x509.log` – TLS handshake and certificate information
+- This confirmed that Zeek was enabled and monitoring the same traffic seen by Suricata on the lab network.
+
+---
+
+## IDS-14 – Generate Sample HTTP, DNS, and TLS Traffic and Confirm Logs
+
+For IDS-14, I generated representative HTTP, DNS, and TLS traffic from the Kali VM and verified that Zeek produced corresponding log entries.
+
+### HTTP Traffic
+
+- From Kali (10.10.10.5), I generated HTTP requests to hosts on the monitored network and, if available, external HTTP sites, for example:
+  - `curl http://10.10.10.1/`
+  - `curl http://example.com/`
+- In `http.log`, I confirmed entries with:
+  - `id.orig_h` = 10.10.10.5 (Kali)
+  - `id.resp_h` = the HTTP server IP (for example 10.10.10.1 or the external site’s IP)
+  - Fields such as `method`, `host`, `uri`, and `status_code` populated with the expected values.
+
+### DNS Traffic
+
+- From Kali, I generated DNS queries such as:
+  - `dig example.com`
+  - `dig securityonion.net`
+- In `dns.log`, I confirmed entries with:
+  - `id.orig_h` = 10.10.10.5
+  - `query` matching the requested domains
+  - `qtype_name` and `rcode_name` showing the query type (for example A) and the response code (for example NOERROR).
+
+### TLS Traffic
+
+- From Kali, I generated TLS traffic, for example:
+  - `curl https://example.com`
+- In the Zeek logs, I confirmed:
+  - `conn.log` entries where `service` was identified as `ssl`.
+  - Corresponding `ssl.log` entries for those connections, including fields such as `server_name` (SNI), `version`, and `cipher`.
+  - `x509.log` entries with certificate subject and issuer information for the same TLS sessions.
+
+These checks confirmed that Zeek was successfully capturing HTTP, DNS, and TLS activity associated with the lab traffic generated from the Kali VM.
+
+---
+
+## IDS-15 – Zeek Quick Reference for Common Alert Types
+
+For IDS-15, I created a short Zeek quick-reference that maps common IDS alert types from this lab to the Zeek logs and fields that are most useful during investigation. This serves as a simple guide for pivoting from Suricata alerts into Zeek metadata.
+
+### Zeek Quick Reference Table
+
+| Alert Type / Scenario                            | Example Suricata Rule / Signature                                                            | Primary Zeek Log(s)     | Key Fields to Check                                                                                      | Usage Notes                                                                                             |
+|--------------------------------------------------|-----------------------------------------------------------------------------------------------|-------------------------|-----------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| Port scan / SYN recon                            | `LAB Possible TCP SYN Scan` (SID 9000001)                                                    | `conn.log`              | `ts`, `id.orig_h`, `id.resp_h`, `id.resp_p`, `proto`, `history`, `duration`, `orig_bytes`, `resp_bytes` | Look for many short-lived connections from a single `id.orig_h` to many destination ports (`id.resp_p`). |
+| SSH brute/scan                                   | `LAB Possible SSH Brute Force` (SID 9000002)                                                 | `conn.log`, `ssh.log`*  | `id.orig_h`, `id.resp_h`, `id.resp_p`, `service`, `history`                                              | Focus on repeated connections to port 22. If `ssh.log` is enabled, review authentication attempts there. |
+| HTTP web attack (SnortReport nmap.php)          | `ET WEB_SPECIFIC_APPS SnortReport nmap.php target Parameter Arbitrary Command Execution Attempt` (SID 2011555) | `http.log`, `conn.log` | `id.orig_h`, `id.resp_h`, `uri`, `host`, `user_agent`, `status_code`                                     | Pivot from the alert’s 5-tuple to `http.log` to inspect the suspicious URI and headers in detail.       |
+| General HTTP suspicious activity / anomalies     | Any HTTP-related Suricata alert                                                              | `http.log`, `conn.log` | `uri`, `method`, `referrer`, `user_agent`, `response_body_len`                                           | Use `http.log` to understand what was requested and how the server responded.                           |
+| DNS-related indicators (domains, tunneling, etc) | DNS or C2 alerts (not a main focus of this milestone, but relevant for completeness)         | `dns.log`               | `query`, `qtype_name`, `rcode_name`, `answers`                                                           | Inspect suspicious domains, repeated queries, unusual record types, or failed responses.                |
+| TLS / certificate anomalies                      | SSL/TLS or certificate-related alerts                                                        | `ssl.log`, `x509.log`, `conn.log` | `server_name`, `version`, `cipher` in `ssl.log`; `subject`, `issuer` in `x509.log`                      | Use these fields to determine if the TLS connection is expected or using untrusted/self-signed certs.   |
+
+\* `ssh.log` may not be enabled by default in all deployments; if present, it can provide additional context on SSH sessions.
+
+This quick reference summarizes how to pivot from a Suricata alert (identified primarily by IPs, ports, and timestamps) into Zeek logs to gather additional protocol-level and behavioral context for each type of activity observed in the lab.
