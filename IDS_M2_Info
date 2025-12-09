@@ -51,59 +51,55 @@ alert tcp any any -> $HOME_NET 22 (msg:"LAB Possible SSH Brute Force"; flags:S; 
 
 ## IDS-12 – Trigger Each Scenario and Confirm Alerts
 
-For IDS-12, I executed each of the three lab scenarios from the Kali VM and verified that Suricata generated at least one alert for the corresponding rule.
+For IDS-12, I attempted to execute each of the three lab scenarios from the Kali VM and verify that Suricata generated at least one alert for the corresponding rule. Suricata was successfully monitoring the 10.10.10.0/24 lab network (confirmed with tcpdump), but for reasons discussed below, the custom rules did not ultimately produce visible alerts in the SOC “Alerts” view.
 
 ### Scenario A – Port Scan (LAB Possible TCP SYN Scan)
 
-- Command on Kali: `sudo nmap -sS -T4 -p 1-100 SO_IP`
-- Expected mapping:
-  - Rule: LAB Possible TCP SYN Scan
-  - SID: 9000001
-- Verification steps:
-  - In SOC, open Alerts and set the time range to “Last 15 minutes”.
-  - Filter by signature name `LAB Possible TCP SYN Scan` or by source IP `KALI_IP`.
-  - Confirm at least one alert with:
-    - Source IP = KALI_IP
-    - Destination IP = SO_IP
-    - Signature = LAB Possible TCP SYN Scan.
-- Evidence: screenshot `m2_scenarioA_portscan_alert.png` showing the alert row with correct src/dst and signature.
+- Command on Kali: `sudo nmap -sS -T4 -p 1-100 10.10.10.1`
+- Intended mapping:
+  - Rule: `LAB Possible TCP SYN Scan`
+  - SID: `9000001`
+- Observed:
+  - Verified on the Security Onion sensor with `tcpdump` that traffic from `10.10.10.5` (Kali) to `10.10.10.1` was visible on the monitored interface.
+  - The Suricata health indicator occasionally reported **Rule Mismatch**, indicating that the enabled rules in SOC and the rules deployed to the engine were not perfectly in sync.
+  - Despite multiple runs of the scan and several rule tweaks (including widening the destination from `$HOME_NET` to `any` and bumping the revision), no `LAB Possible TCP SYN Scan` alerts appeared in the SOC “Alerts” view for the test window.
+- Conclusion:
+  - The sensor clearly saw the packets, but the detection pipeline did not raise the custom port-scan alert, most likely due to a combination of rule-deployment mismatch and `$HOME_NET` / interface configuration in this lab environment.
 
 ---
 
 ### Scenario B – SSH Brute/Scan (LAB Possible SSH Brute Force)
 
-- Command on Kali: `for i in $(seq 1 25); do nc -vz SO_IP 22; done`
-- Expected mapping:
-  - Rule: LAB Possible SSH Brute Force
-  - SID: 9000002
-- Verification steps:
-  - In SOC → Alerts, time range “Last 15 minutes”.
-  - Filter by signature name `LAB Possible SSH Brute Force` or by source IP `KALI_IP`.
-  - Confirm at least one alert with:
-    - Source IP = KALI_IP
-    - Destination IP = SO_IP
-    - Destination port = 22/tcp
-    - Signature = LAB Possible SSH Brute Force.
-- Evidence: screenshot `m2_scenarioB_ssh_alert.png` showing the SSH brute/scan alert.
+- Command on Kali: `for i in $(seq 1 25); do nc -vz 10.10.10.1 22; done`
+- Intended mapping:
+  - Rule: `LAB Possible SSH Brute Force`
+  - SID: `9000002`
+- Observed:
+  - The SSH probes from Kali to `10.10.10.1:22` were visible in a packet capture on the sensor.
+  - The custom SSH rule was present in SOC, syntactically valid, assigned a unique SID, and marked Enabled.
+  - Even after relaxing the destination from `$HOME_NET 22` to `any 22` and redeploying rules, no `LAB Possible SSH Brute Force` entries appeared in the Alerts UI during the test window.
+- Conclusion:
+  - The lab successfully generated SSH-like brute/scan traffic on the monitored network, but Suricata did not emit the expected custom alert. This reinforces the rule-deployment / HOME_NET mismatch identified in Scenario A.
 
 ---
 
 ### Scenario C – HTTP Web Attack (SnortReport nmap.php)
 
-- Command on Kali: `curl "http://SO_IP/nmap.php?target=1.2.3.4"`
-- Expected mapping:
-  - Rule: ET WEB_SPECIFIC_APPS SnortReport nmap.php target Parameter Arbitrary Command Execution Attempt
-  - SID: 2011555
-- Verification steps:
-  - In SOC → Alerts, time range “Last 15 minutes”.
-  - Search for `nmap.php` or filter by the SnortReport rule title.
-  - Confirm at least one alert with:
-    - Source IP = KALI_IP
-    - Destination IP = SO_IP
-    - Protocol = http
-    - Signature = ET WEB_SPECIFIC_APPS SnortReport nmap.php target Parameter Arbitrary Command Execution Attempt.
-- Evidence: screenshot `m2_scenarioC_http_alert.png` showing the HTTP attack alert.
+- Command on Kali: `curl "http://10.10.10.1/nmap.php?target=1.2.3.4"`
+- Intended mapping:
+  - Rule: `ET WEB_SPECIFIC_APPS SnortReport nmap.php target Parameter Arbitrary Command Execution Attempt`
+  - SID: `2011555`
+- Observed:
+  - HTTP requests from Kali to `10.10.10.1` were visible in packet capture; Suricata was clearly receiving the traffic.
+  - The SnortReport rule was present in the ET OPEN ruleset and marked Enabled in the Detections UI.
+  - No corresponding SnortReport alerts appeared in the Alerts view, even after sending multiple requests and verifying the URI pattern matched the rule’s description.
+- Conclusion:
+  - The HTTP attack scenario was correctly generated on the monitored segment, but the existing ET rule did not visibly trigger, likely due to the same underlying rule-synchronization issues that affected the custom rules.
 
 ---
+
+### IDS-12 Result
+
+The lab successfully generated all three attack scenarios (port scan, SSH brute/scan, and HTTP attack) on the monitored 10.10.10.0/24 network, and packet captures confirmed that Security Onion’s sensor saw the traffic. However, due to unresolved Suricata rule-deployment mismatches and probable `$HOME_NET` / interface configuration issues, the corresponding Suricata rules did not produce visible alerts in the SOC Alerts UI. Even though the strict requirement of “at least one alert per scenario” was not fully met, the work for IDS-12 still demonstrates the intended workflow: defining scenarios, mapping them to rules, generating traffic from Kali, validating visibility at the packet level, and documenting detection failures for follow-up tuning in later milestones.
 
 IDS-12 Result: all three lab scenarios produced the expected Suricata alerts, confirming that the curated lab rule pack is active and correctly detecting the Nmap scan, SSH brute/scan, and HTTP web-attack traffic generated from the Kali VM.
