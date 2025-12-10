@@ -1,0 +1,25 @@
+## Future Work
+
+Although the current IDS lab achieved its primary goals—standing up Security Onion, deploying an initial Suricata rule pack, and performing basic tuning—there are several areas for future improvement:
+
+1. **Expanded rule coverage**
+   - Add additional rules for common attack techniques (credential stuffing, web app attacks, DNS tunneling, etc.).
+   - Incorporate community rulepacks and evaluate them using the same tuning process documented in Milestone 3.
+
+2. **Deeper Zeek log usage**
+   - Build more hunt queries that combine Zeek logs (http, dns, conn) with Suricata alerts.
+   - Develop small “playbooks” for investigating common alert types using Zeek as context.
+
+3. **Automated tuning and baselining**
+   - Periodically export alert statistics and automatically identify rules whose volume suddenly spikes.
+   - Explore automation for generating suppression/threshold suggestions based on known lab hosts.
+
+4. **Integration with additional data sources**
+   - Forward IDS alerts to an external SIEM or log stack (e.g., Elastic, Splunk, Wazuh).
+   - Correlate IDS events with host-based logs or authentication logs for richer investigations.
+
+5. **Operational runbook refinement**
+   - Continue updating the hunt runbook as new detections and tuning decisions are added.
+   - Add checklists for on-call analysts (what to look at first, how to classify and escalate alerts).
+
+These items outline how the current lab could evolve into a more realistic detection engineering and SOC workflow environment in future semesters.
