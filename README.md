@@ -238,3 +238,35 @@ You may view and fork this repository for **educational purposes**, but must:
 - Not submit this work as your own for any other course without permission.
 - Preserve appropriate attribution if reusing material.
 
+---
+
+## Individual Contribution Multiplier
+
+Just like in the real world, each team member is accountable for their specific contributions.
+
+Your individual grade is calculated by multiplying the **team’s score** by your **contribution percentage**:
+
+> **Your Grade = (Team Score) × (Number of Members) × (Your Contribution %)**
+
+### How We Measured Contribution
+
+We approximated contribution using our **GitHub Project Board and group task breakdown**:
+
+- Each task was estimated with **Story Points** using the set `{1, 2, 3, 5}`:
+  - 1 = very small task (minor edits, single screenshot, etc.)
+  - 2 = small task
+  - 3 = medium task (short script, small section of report)
+  - 5 = large task (full environment setup, major document section, troubleshooting)
+- For each member, we totaled the Story Points of the tasks they completed.
+- Contribution percentage was then calculated as:
+
+> **Contribution % = (Member Story Points) ÷ (Total Story Points for All Members)**
+
+### Story Point Summary
+
+| Member Name      | GitHub Username | Story Points Completed | Contribution % | Notes (major tasks / issues)                                               |
+|------------------|-----------------|------------------------|----------------|----------------------------------------------------------------------------|
+| Moses Chavez     | @mwchavez       | 36                     | 0.36 (36%)     | Security Onion config & Run / Zeek config & run / README & Docs / IDS Wiki |
+| Marissa Turner   | @marilturner    | 35                     | 0.35 (35%)     | Docs / Presentation / Suricata config & run / PCAP Prep / future work      |
+| Dylan Ponce      | @dyponce        | 29                     | 0.29 (29%)     | Wireshark analysis / DF Wiki                                               |
+| **Total**        | —               | **100**                | **1.00 (100%)**|----------------------------------------------------------------------------|
