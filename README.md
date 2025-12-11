@@ -1,4 +1,4 @@
-# UIW IDS / Digital Forensics Group Project
+# UIW IDS / Digital Forensics Group Project - Intrusion to Investigation
 
 Proposal for Group Project – Cyber Security Systems – University of the Incarnate Word  
 
