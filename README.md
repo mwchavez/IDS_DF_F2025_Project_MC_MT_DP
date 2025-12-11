@@ -152,104 +152,89 @@ A minimal workflow for using the contents of this repo looks like:
 
    ```bash
    wireshark pcap/example_capture.pcap
-Verify that basic protocols (IP, TCP, HTTP, DNS, etc.) are visible.
+   - Verify that basic protocols (IP, TCP, HTTP, DNS, etc.) are visible.
+   - Use this to confirm that the PCAP files in the repo are valid and useful.
 
-Use this to confirm that the PCAP files in the repo are valid and useful.
+2. **Replay or import the same PCAP into Security Onion / Zeek**
 
-Replay or import the same PCAP into Security Onion / Zeek
+   - Use your course-approved method to:
+     - Import the PCAP.
+     - Generate Zeek logs.
+   - Confirm that:
+     - Zeek logs are produced.
+     - Any expected alerts or notices fire.
 
-Use your course-approved method to:
+This “Hello World” verifies that the **pcap**, **config**, and **docs** pieces of the project are aligned.
 
-Import the PCAP.
+---
 
-Generate Zeek logs.
+## Environment & Dependencies
 
-Confirm that:
-
-Zeek logs are produced.
-
-Any expected alerts or notices fire.
-
-This “Hello World” verifies that the pcap, config, and docs pieces of the project are aligned.
-
-Environment & Dependencies
 This project assumes access to:
 
-Security Onion (or Zeek/Suricata in a similar lab environment).
+- **Security Onion** (or Zeek/Suricata in a similar lab environment).
+- **Wireshark** for packet analysis.
+- A host or VM with enough resources to:
+  - Run the IDS stack.
+  - Load and inspect PCAPs.
 
-Wireshark for packet analysis.
+Exact installation steps and IP addressing are documented in the course materials and/or in `docs/`.
 
-A host or VM with enough resources to:
+---
 
-Run the IDS stack.
+## Run Demo
 
-Load and inspect PCAPs.
-
-Exact installation steps and IP addressing are documented in the course materials and/or in docs/.
-
-Run Demo
 A typical end-to-end demo using this repo:
 
-Select a representative PCAP from pcap/.
+1. Select a representative **PCAP** from `pcap/`.
+2. Import or replay it into **Security Onion**, generating Zeek/Suricata output.
+3. Capture screenshots of:
+   - Dashboards.
+   - Alerts.
+   - Relevant logs.  
+   and store them in `project_pictures/`.
+4. Open the same PCAP in **Wireshark**:
+   - Reconstruct key conversations.
+   - Identify indicators of compromise or suspicious behavior.
+5. Update `docs/`:
+   - Describe what the IDS saw.
+   - Describe what DF analysis confirmed.
+   - Connect the findings to your proposal and learning objectives.
 
-Import or replay it into Security Onion, generating Zeek/Suricata output.
+The presentation link (stored in `**WORK IN PROGRESS** LINK TO PRESENTATION`) is used to walk through this demo live.
 
-Capture screenshots of:
+---
 
-Dashboards.
+## Bugs and Feedback
 
-Alerts.
-
-Relevant logs.
-and store them in project_pictures/.
-
-Open the same PCAP in Wireshark:
-
-Reconstruct key conversations.
-
-Identify indicators of compromise or suspicious behavior.
-
-Update docs/:
-
-Describe what the IDS saw.
-
-Describe what DF analysis confirmed.
-
-Connect the findings to your proposal and learning objectives.
-
-The presentation link (stored in **WORK IN PROGRESS** LINK TO PRESENTATION) is used to walk through this demo live.
-
-Bugs and Feedback
 If you find:
 
-Broken links in docs.
-
-Missing PCAPs or images.
-
-Incorrect configuration paths.
+- Broken links in docs.
+- Missing PCAPs or images.
+- Incorrect configuration paths.
 
 Please:
 
-Open an Issue in this repository.
+1. Open an **Issue** in this repository.
+2. Add a short description and, if possible, steps to reproduce.
 
-Add a short description and, if possible, steps to reproduce.
+For grading / rubric questions, always contact the **UIW instructor** directly.
 
-For grading / rubric questions, always contact the UIW instructor directly.
+---
 
-License
-This repository is created for coursework in the
-Cyber Security Systems program at the University of the Incarnate Word.
+## License
+
+This repository is created for coursework in the  
+**Cyber Security Systems program at the University of the Incarnate Word**.
 
 Unless otherwise stated:
 
-Copyright © 2025, UIW IDS/DF Group Project Team.
+- Copyright © 2025, UIW IDS/DF Group Project Team.  
+- All rights reserved.  
 
-All rights reserved.
+You may view and fork this repository for **educational purposes**, but must:
 
-You may view and fork this repository for educational purposes, but must:
+- Follow UIW’s academic integrity policies.
+- Not submit this work as your own for any other course without permission.
+- Preserve appropriate attribution if reusing material.
 
-Follow UIW’s academic integrity policies.
-
-Not submit this work as your own for any other course without permission.
-
-Preserve appropriate attribution if reusing material.
