@@ -40,10 +40,7 @@ infection:
 | Payload    | `block.dll`                                                          | Ursnif DLL loaded after macro execution.         |
 | Path       | `C:\Users\<user>\Downloads\I8m7XluZbbj10J53.xlsb`                     | Likely download location from email client.      |
 | Path       | `%TEMP%\block.dll`                                                   | Typical drop location for payload DLL.           |
-| Path       | `%APPDATA%\[random folder]\[random name].exe` or DLL                 | Common Ursnif persistence location.              |
-
-Replace `<user>` and `[random …]` with any specific values you recover from
-host artifacts if available.
+| Path       | `%APPDATA%\[hidden]\[extern].exe` or DLL                 | Common Ursnif persistence location.              |
 
 ### 2.2 File Hashes
 
@@ -83,4 +80,5 @@ GET /<random path> (host app.buboleinov.com) – C2 check-ins
 GET /<random path> and POST /<random path> (host todo.faroin.at) – C2 and/or data exfiltration
 
 When documenting in your report, you can show one or two example HTTP streams
+
 from “Follow TCP Stream” to demonstrate these patterns.
