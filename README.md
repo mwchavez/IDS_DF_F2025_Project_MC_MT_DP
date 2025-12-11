@@ -229,7 +229,7 @@ This repository is created for coursework in the
 
 Unless otherwise stated:
 
-- Copyright © 2025, UIW IDS/DF Group Project Team.  
+- Copyright © 2025, UIW IDS_DF_F2025_Project_MC_MT_DP Team.  
 - All rights reserved.  
 
 You may view and fork this repository for **educational purposes**, but must:
